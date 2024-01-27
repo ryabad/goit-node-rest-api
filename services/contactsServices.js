@@ -43,7 +43,9 @@ export async function updateContactService(id, body) {
 export async function updateStatusContact(id, body) {
   const contact = await Contact.findById(id);
 
-  contact["favorite"] = body["favorite"];
+  Object.keys(body).forEach((key) => {
+    contact[key] = body[key];
+  });
 
   return contact.save();
 }
