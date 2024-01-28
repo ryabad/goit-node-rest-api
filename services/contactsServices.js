@@ -53,5 +53,5 @@ export async function updateStatusContact(id, body) {
 export async function checkId(id) {
   const isValid = Types.ObjectId.isValid(id);
 
-  if (!isValid) throw HttpError(400, "Invalid ID. User not found...");
+  if (!isValid) throw HttpError(400, "Invalid ID. Not found...");
 }
