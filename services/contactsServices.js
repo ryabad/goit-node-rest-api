@@ -31,23 +31,19 @@ export async function addContact(data) {
 }
 
 export async function updateContactService(id, body) {
-  const contact = await Contact.findById(id);
-
-  Object.keys(body).forEach((key) => {
-    contact[key] = body[key];
+  const contact = await Contact.findByIdAndUpdate(id, body, {
+    new: true,
   });
 
-  return contact.save();
+  return contact;
 }
 
 export async function updateStatusContact(id, body) {
-  const contact = await Contact.findById(id);
-
-  Object.keys(body).forEach((key) => {
-    contact[key] = body[key];
+  const contact = await Contact.findByIdAndUpdate(id, body, {
+    new: true,
   });
 
-  return contact.save();
+  return contact;
 }
 
 export async function checkId(id) {
