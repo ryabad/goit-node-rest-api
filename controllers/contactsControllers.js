@@ -106,7 +106,7 @@ export const updateStatus = async (req, res, next) => {
   }
 };
 
-export const checkUserId = async (req, res, next) => {
+export const checkContactId = async (req, res, next) => {
   try {
     await checkId(req.params.id);
     next();

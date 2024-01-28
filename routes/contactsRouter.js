@@ -6,7 +6,7 @@ import {
   createContact,
   updateContact,
   updateStatus,
-  checkUserId,
+  checkContactId,
 } from "../controllers/contactsControllers.js";
 
 import validateBody from "../helpers/validateBody.js";
@@ -20,7 +20,7 @@ const contactsRouter = express.Router();
 
 contactsRouter.get("/", getAllContacts);
 
-contactsRouter.use("/:id", checkUserId);
+contactsRouter.use("/:id", checkContactId);
 
 contactsRouter.get("/:id", getOneContact);
 
