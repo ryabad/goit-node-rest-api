@@ -50,4 +50,8 @@ export async function checkId(id) {
   const isValid = Types.ObjectId.isValid(id);
 
   if (!isValid) throw HttpError(400, "Invalid ID. Not found...");
+
+  const isExist = await Contact.findById(id).select("_id");
+
+  if (!isExist) throw HttpError(400, "Invalid ID. Not found...");
 }
