@@ -11,7 +11,7 @@ import {
 
 export const getAllContacts = async (req, res, next) => {
   try {
-    const contacts = await listContacts();
+    const contacts = await listContacts(req);
 
     res.status(200).json(contacts);
   } catch (error) {
@@ -23,7 +23,7 @@ export const getOneContact = async (req, res, next) => {
   try {
     const id = req.params.id;
 
-    const contact = await getContactById(id);
+    const contact = await getContactById(id, req);
 
     if (!contact) {
       throw HttpError(404);
@@ -39,7 +39,7 @@ export const deleteContact = async (req, res, next) => {
   try {
     const id = req.params.id;
 
-    const contact = await removeContact(id);
+    const contact = await removeContact(id, req);
 
     if (!contact) {
       throw HttpError(404);
@@ -53,7 +53,7 @@ export const deleteContact = async (req, res, next) => {
 
 export const createContact = async (req, res, next) => {
   try {
-    const data = await addContact(req.body);
+    const data = await addContact(req.body, req.user);
 
     if (!data) {
       throw HttpError(409, "This email already used");
@@ -77,7 +77,7 @@ export const updateContact = async (req, res, next) => {
 
     const id = req.params.id;
 
-    const contact = await updateContactService(id, req.body);
+    const contact = await updateContactService(id, req.body, req.user);
 
     if (!contact) {
       throw HttpError(404);
@@ -98,7 +98,7 @@ export const updateStatus = async (req, res, next) => {
     }
 
     const id = req.params.id;
-    const contact = await updateStatusContact(id, req.body);
+    const contact = await updateStatusContact(id, req.body, req.user);
 
     res.status(200).json(contact);
   } catch (error) {
@@ -108,7 +108,7 @@ export const updateStatus = async (req, res, next) => {
 
 export const checkContactId = async (req, res, next) => {
   try {
-    await checkId(req.params.id);
+    await checkId(req.params.id, req.user);
     next();
   } catch (error) {
     next(error);

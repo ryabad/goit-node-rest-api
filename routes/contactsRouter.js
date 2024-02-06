@@ -15,8 +15,11 @@ import {
   updateContactSchema,
   updateStatusSchema,
 } from "../schemas/contactsSchemas.js";
+import { protect } from "../middlewares/authMiddleware.js";
 
 const contactsRouter = express.Router();
+
+contactsRouter.use(protect);
 
 contactsRouter.get("/", getAllContacts);
 
