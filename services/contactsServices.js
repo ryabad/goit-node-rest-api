@@ -2,9 +2,7 @@ import { Types } from "mongoose";
 import { Contact } from "../models/contactModel.js";
 import HttpError from "../helpers/HttpError.js";
 
-export async function listContacts(req) {
-  const { _id: owner } = req.user;
-
+export async function listContacts(owner) {
   const contacts = await Contact.find(
     { owner },
     "name email phone favorite"
@@ -12,8 +10,8 @@ export async function listContacts(req) {
   return contacts;
 }
 
-export async function getContactById(contactId, req) {
-  const { _id: owner } = req.user;
+export async function getContactById(data) {
+  const { contactId, owner } = data;
 
   const contact = await Contact.findById(contactId)
     .where("owner")
@@ -21,8 +19,8 @@ export async function getContactById(contactId, req) {
   return contact;
 }
 
-export async function removeContact(contactId, req) {
-  const { _id: owner } = req.user;
+export async function removeContact(data) {
+  const { contactId, owner } = data;
 
   const contact = await Contact.findByIdAndDelete(contactId)
     .where("owner")
@@ -30,55 +28,76 @@ export async function removeContact(contactId, req) {
   return contact;
 }
 
-export async function addContact(data, user) {
-  const { _id: owner } = user;
+export async function addContact(data) {
+  const { body, owner } = data;
 
-  const isExist = await Contact.exists({ email: data.email })
+  const isExist = await Contact.exists({ email: body.email })
     .where("owner")
     .equals(owner);
 
   if (isExist) {
     console.log("This contact already exist");
-    return null;
+    throw HttpError(409, "This email already used");
   }
 
-  const newContact = await Contact.create({ ...data, owner });
+  const newContact = await Contact.create({ ...body, owner });
 
   return newContact;
 }
 
-export async function updateContactService(id, body, user) {
-  const { _id: owner } = user;
+export async function updateContactService(data) {
+  const { contactId, body, owner } = data;
 
-  const contact = await Contact.findByIdAndUpdate(id, body, {
+  if (Object.keys(body).length === 0) {
+    throw HttpError(400, "Body must have at least one field");
+  }
+
+  if (Object.keys(body).includes("favorite")) {
+    throw HttpError(400, "favorite field should not be in the body");
+  }
+
+  const contact = await Contact.findByIdAndUpdate(contactId, body, {
     new: true,
   })
     .where("owner")
     .equals(owner);
 
+  if (!contact) {
+    throw HttpError(404);
+  }
   return contact;
 }
 
-export async function updateStatusContact(id, body, user) {
-  const { _id: owner } = user;
+export async function updateStatusContact(data) {
+  const { contactId, body, owner } = data;
 
-  const contact = await Contact.findByIdAndUpdate(id, body, {
+  const check = Object.keys(body);
+
+  if (!(check.length === 1 && check.includes("favorite"))) {
+    throw HttpError(404, "Not Found. Must contain only favorite field");
+  }
+
+  const contact = await Contact.findByIdAndUpdate(contactId, body, {
     new: true,
   })
     .where("owner")
     .equals(owner);
 
+  if (!contact) {
+    throw HttpError(404);
+  }
+
   return contact;
 }
 
-export async function checkId(id, user) {
-  const { _id: owner } = user;
+export async function checkId(data) {
+  const { owner, contactId } = data;
 
-  const isValid = Types.ObjectId.isValid(id);
+  const isValid = Types.ObjectId.isValid(contactId);
 
   if (!isValid) throw HttpError(400, "Invalid ID. Not found...");
 
-  const isExist = await Contact.findById(id)
+  const isExist = await Contact.findById(contactId)
     .select("_id")
     .where("owner")
     .equals(owner);

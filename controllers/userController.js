@@ -1,6 +1,5 @@
-import HttpError from "../helpers/HttpError.js";
 import { User } from "../models/userModel.js";
-import { login, signup } from "../services/userServices.js";
+import { login, signup, updateUser } from "../services/userServices.js";
 
 export const register = async (req, res, next) => {
   try {
@@ -49,7 +48,7 @@ export const current = async (req, res, next) => {
 export const logout = async (req, res, next) => {
   try {
     const { _id } = req.user;
-    console.log("id", _id);
+
     await User.findByIdAndUpdate(_id, { token: "" });
 
     res.status(204).json();
@@ -60,21 +59,12 @@ export const logout = async (req, res, next) => {
 
 export const updateSubscription = async (req, res, next) => {
   try {
-    const check = Object.keys(req.body);
-
-    if (!(check.length === 1 && check.includes("subscription"))) {
-      throw HttpError(404, "Not Found. Must contain only subscription field");
-    }
-
     const { _id } = req.user;
-
-    const updatedUser = await User.findByIdAndUpdate(_id, req.body, {
-      new: true,
-    });
+    const { user } = await updateUser({ id: _id, body: req.body });
 
     res.status(200).json({
-      email: updatedUser.email,
-      subscription: updatedUser.subscription,
+      email: user.email,
+      subscription: user.subscription,
     });
   } catch (error) {
     next(error);

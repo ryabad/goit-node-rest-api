@@ -11,7 +11,9 @@ import {
 
 export const getAllContacts = async (req, res, next) => {
   try {
-    const contacts = await listContacts(req);
+    const { id: owner } = req.user;
+
+    const contacts = await listContacts(owner);
 
     res.status(200).json(contacts);
   } catch (error) {
@@ -21,9 +23,10 @@ export const getAllContacts = async (req, res, next) => {
 
 export const getOneContact = async (req, res, next) => {
   try {
-    const id = req.params.id;
+    const contactId = req.params.id;
+    const { id: owner } = req.user;
 
-    const contact = await getContactById(id, req);
+    const contact = await getContactById({ contactId, owner });
 
     if (!contact) {
       throw HttpError(404);
@@ -37,9 +40,10 @@ export const getOneContact = async (req, res, next) => {
 
 export const deleteContact = async (req, res, next) => {
   try {
-    const id = req.params.id;
+    const { id: owner } = req.user;
+    const contactId = req.params.id;
 
-    const contact = await removeContact(id, req);
+    const contact = await removeContact({ contactId, owner });
 
     if (!contact) {
       throw HttpError(404);
@@ -53,11 +57,9 @@ export const deleteContact = async (req, res, next) => {
 
 export const createContact = async (req, res, next) => {
   try {
-    const data = await addContact(req.body, req.user);
+    const { id: owner } = req.user;
 
-    if (!data) {
-      throw HttpError(409, "This email already used");
-    }
+    const data = await addContact({ body: req.body, owner });
 
     res.status(201).json(data);
   } catch (error) {
@@ -67,21 +69,14 @@ export const createContact = async (req, res, next) => {
 
 export const updateContact = async (req, res, next) => {
   try {
-    if (Object.keys(req.body).length === 0) {
-      throw HttpError(400, "Body must have at least one field");
-    }
+    const { id: owner } = req.user;
+    const contactId = req.params.id;
 
-    if (Object.keys(req.body).includes("favorite")) {
-      throw HttpError(400, "favorite field should not be in the body");
-    }
-
-    const id = req.params.id;
-
-    const contact = await updateContactService(id, req.body, req.user);
-
-    if (!contact) {
-      throw HttpError(404);
-    }
+    const contact = await updateContactService({
+      contactId,
+      body: req.body,
+      owner,
+    });
 
     res.status(200).json(contact);
   } catch (error) {
@@ -91,14 +86,14 @@ export const updateContact = async (req, res, next) => {
 
 export const updateStatus = async (req, res, next) => {
   try {
-    const check = Object.keys(req.body);
+    const { id: owner } = req.user;
+    const contactId = req.params.id;
 
-    if (!(check.length === 1 && check.includes("favorite"))) {
-      throw HttpError(404, "Not Found. Must contain only favorite field");
-    }
-
-    const id = req.params.id;
-    const contact = await updateStatusContact(id, req.body, req.user);
+    const contact = await updateStatusContact({
+      contactId,
+      body: req.body,
+      owner,
+    });
 
     res.status(200).json(contact);
   } catch (error) {
@@ -108,7 +103,11 @@ export const updateStatus = async (req, res, next) => {
 
 export const checkContactId = async (req, res, next) => {
   try {
-    await checkId(req.params.id, req.user);
+    const { id: owner } = req.user;
+    const contactId = req.params.id;
+
+    await checkId({ owner, contactId });
+
     next();
   } catch (error) {
     next(error);

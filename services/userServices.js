@@ -37,3 +37,19 @@ export async function checkUserExist(data) {
 
   if (userExists) throw HttpError(409, "User already exists...");
 }
+
+export async function updateUser(data) {
+  const { id, body } = data;
+
+  const check = Object.keys(body);
+
+  if (!(check.length === 1 && check.includes("subscription"))) {
+    throw HttpError(404, "Not found! Must contain only subscription field");
+  }
+
+  const updatedUser = await User.findByIdAndUpdate(id, body, {
+    new: true,
+  });
+
+  return { user: updatedUser };
+}
