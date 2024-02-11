@@ -1,5 +1,10 @@
 import { User } from "../models/userModel.js";
-import { login, signup, updateUser } from "../services/userServices.js";
+import {
+  login,
+  signup,
+  updateUser,
+  updateUserAvatar,
+} from "../services/userServices.js";
 
 export const register = async (req, res, next) => {
   try {
@@ -66,6 +71,17 @@ export const updateSubscription = async (req, res, next) => {
       email: user.email,
       subscription: user.subscription,
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateAvatar = async (req, res, next) => {
+  try {
+    const { _id } = req.user;
+    const { avatarURL } = await updateUserAvatar({ id: _id, file: req.file });
+
+    res.json({ avatarURL });
   } catch (error) {
     next(error);
   }

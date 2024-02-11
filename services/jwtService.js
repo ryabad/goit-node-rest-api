@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import HttpError from "../helpers/HttpError.js";
+import { HttpError } from "../helpers/HttpError.js";
 
 export const signToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, {

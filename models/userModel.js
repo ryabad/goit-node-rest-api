@@ -17,6 +17,7 @@ const userSchema = new Schema({
     default: "starter",
   },
   token: String,
+  avatarURL: String,
 });
 
 userSchema.pre("save", async function (next) {
@@ -31,6 +32,4 @@ userSchema.pre("save", async function (next) {
 userSchema.methods.checkPassword = (candidate, password) =>
   compare(candidate, password);
 
-const User = model("User", userSchema);
-
-export { User };
+export const User = model("User", userSchema);
