@@ -21,3 +21,7 @@ export const updateSubSchema = Joi.object({
       "any.only": "Only starter, pro, business",
     }),
 });
+
+export const verificationSchema = Joi.object({
+  email: Joi.string().email().required(),
+});

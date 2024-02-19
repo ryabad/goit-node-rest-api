@@ -8,6 +8,7 @@ import { signToken } from "./jwtService.js";
 import { User } from "../models/userModel.js";
 
 import { HttpError } from "../helpers/HttpError.js";
+import { sendEmail } from "./emailServices.js";
 
 const avatarsPath = path.resolve("public", "avatars");
 
@@ -20,10 +21,22 @@ export async function signup(userData) {
 
   const avatarURL = gravatar.url(email);
 
+  const verificationToken = nanoid();
+
   const newUser = await User.create({
     ...userData,
     avatarURL,
+    verificationToken,
   });
+
+  //-------------------------
+  const verifyMessage = {
+    to: email,
+    subject: "Verify",
+    html: `<a target="_blank" href="${process.env.VERIFY_URL}/${verificationToken}">Verify account</a>`,
+  };
+
+  await sendEmail(verifyMessage);
 
   return { user: newUser };
 }
@@ -36,6 +49,8 @@ export async function login({ email, password }) {
   const isPasswordValid = await user.checkPassword(password, user.password);
 
   if (!isPasswordValid) throw HttpError(401, "Email or password is wrong");
+
+  if (!user.verify) throw HttpError(401, "Email isn't verified");
 
   const token = signToken(user._id);
 

@@ -1,4 +1,5 @@
 import { User } from "../models/userModel.js";
+import { reVerification, verify } from "../services/emailServices.js";
 import {
   login,
   signup,
@@ -82,6 +83,28 @@ export const updateAvatar = async (req, res, next) => {
     const { avatarURL } = await updateUserAvatar({ id: _id, file: req.file });
 
     res.json({ avatarURL });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const verifyEmail = async (req, res, next) => {
+  try {
+    const { verificationToken } = req.params;
+    await verify({ verificationToken });
+
+    res.status(200).json({ message: "Verification successful" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const reVerifyEmail = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    await reVerification({ email });
+
+    res.status(200).json({ message: "Verification email sent" });
   } catch (error) {
     next(error);
   }

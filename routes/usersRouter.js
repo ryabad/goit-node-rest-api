@@ -3,14 +3,17 @@ import {
   loginUserSchema,
   signupUserSchema,
   updateSubSchema,
+  verificationSchema,
 } from "../schemas/userSchema.js";
 import {
   current,
   logIn,
   logout,
+  reVerifyEmail,
   register,
   updateAvatar,
   updateSubscription,
+  verifyEmail,
 } from "../controllers/userController.js";
 
 import { protect } from "../middlewares/authMiddleware.js";
@@ -20,6 +23,10 @@ import { validateBody } from "../helpers/validateBody.js";
 const userRouter = Router();
 
 userRouter.post("/register", validateBody(signupUserSchema), register);
+
+userRouter.get("/verify/:verificationToken", verifyEmail);
+userRouter.post("/verify", validateBody(verificationSchema), reVerifyEmail);
+
 userRouter.post("/login", validateBody(loginUserSchema), logIn);
 userRouter.post("/logout", protect, logout);
 userRouter.get("/current", protect, current);
