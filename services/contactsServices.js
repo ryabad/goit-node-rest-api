@@ -1,6 +1,6 @@
 import { Types } from "mongoose";
 import { Contact } from "../models/contactModel.js";
-import HttpError from "../helpers/HttpError.js";
+import { HttpError } from "../helpers/HttpError.js";
 
 export async function listContacts(owner) {
   const contacts = await Contact.find(

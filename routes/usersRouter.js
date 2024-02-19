@@ -9,11 +9,13 @@ import {
   logIn,
   logout,
   register,
+  updateAvatar,
   updateSubscription,
 } from "../controllers/userController.js";
 
-import validateBody from "../helpers/validateBody.js";
 import { protect } from "../middlewares/authMiddleware.js";
+import { upload } from "../middlewares/uploadMiddleware.js";
+import { validateBody } from "../helpers/validateBody.js";
 
 const userRouter = Router();
 
@@ -27,5 +29,6 @@ userRouter.patch(
   protect,
   updateSubscription
 );
+userRouter.patch("/avatars", protect, upload, updateAvatar);
 
 export default userRouter;

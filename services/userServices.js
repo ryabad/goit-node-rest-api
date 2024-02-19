@@ -1,6 +1,15 @@
-import { User } from "../models/userModel.js";
+import fs from "fs/promises";
+import path from "path";
+import gravatar from "gravatar";
+import { nanoid } from "nanoid";
+import Jimp from "jimp";
+
 import { signToken } from "./jwtService.js";
-import HttpError from "../helpers/HttpError.js";
+import { User } from "../models/userModel.js";
+
+import { HttpError } from "../helpers/HttpError.js";
+
+const avatarsPath = path.resolve("public", "avatars");
 
 export async function signup(userData) {
   const { email } = userData;
@@ -9,8 +18,11 @@ export async function signup(userData) {
 
   if (user) throw HttpError(409, "User with this email already exists");
 
+  const avatarURL = gravatar.url(email);
+
   const newUser = await User.create({
     ...userData,
+    avatarURL,
   });
 
   return { user: newUser };
@@ -52,4 +64,32 @@ export async function updateUser(data) {
   });
 
   return { user: updatedUser };
+}
+
+export async function updateUserAvatar(data) {
+  const { id, file } = data;
+
+  if (!file) {
+    throw HttpError(400, "File is missing");
+  }
+
+  const { path: tmpUpload, originalname } = file;
+  const fileName = `${id}_${nanoid()}_${originalname}`;
+  const upload = path.resolve(avatarsPath, fileName);
+
+  const img = await Jimp.read(tmpUpload);
+  img.resize(250, 250).write(tmpUpload);
+  await fs.rename(tmpUpload, upload);
+
+  const avatarURL = path.join("avatars", fileName);
+
+  const updatedUserAvatar = await User.findByIdAndUpdate(
+    id,
+    { avatarURL },
+    {
+      new: true,
+    }
+  );
+
+  return { avatarURL: updatedUserAvatar.avatarURL };
 }
